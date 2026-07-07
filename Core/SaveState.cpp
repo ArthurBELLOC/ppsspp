@@ -724,6 +724,55 @@ int g_screenshotFailures;
 		return GetSaveFileDateAsString(fn);
 	}
 
+
+
+	std::string GetSlotCustomName(std::string_view gamePrefix, int slot) {
+		std::string path = GetSysDirectory(DIRECTORY_SAVESTATE).ToVisualString();
+		std::string fnbase = GenerateSaveSlotFilename(gamePrefix, slot, STATE_EXTENSION);
+		std::string delimiter1 = "_";
+		std::string delimiter2 = ".p";
+		std::string delimiter3 = ".";
+		std::string fnsearch = fnbase.substr(0, fnbase.find(delimiter2));
+		std::string res;
+		std::string token;
+        for(auto& p: std::filesystem::directory_iterator(path))
+		{
+				std::string file_name = p.path().filename();
+			if ( file_name.find(fnsearch) == 0 && p.path().extension() == ".txt")
+			{
+				res = file_name;
+			}
+		}
+		size_t underscorePos = res.find_last_of(delimiter1);
+		size_t dotPos = res.find_last_of(delimiter3);
+		if (underscorePos == std::string::npos || dotPos == std::string::npos || dotPos <= underscorePos + 1)
+        	return {};
+
+    	std::string result = res.substr(underscorePos + 1, dotPos - underscorePos - 1);
+    	return result;
+	}
+
+	void SetSlotCustomName(std::string_view gamePrefix, int slot, std::string_view new_name){
+		std::string path = GetSysDirectory(DIRECTORY_SAVESTATE).ToVisualString();
+		std::string fnbase = GenerateSaveSlotFilename(gamePrefix, slot, STATE_EXTENSION);
+		std::string fnsearch = fnbase.substr(0, fnbase.find(".p"));
+		std::string name = SanitizeString(new_name, StringRestriction::NoLineBreaksOrSpecials, 0, 64);
+		std::string replacepath;
+		for(auto& p: std::filesystem::directory_iterator(path))
+		{
+				std::string file_name = p.path().filename();
+			if ( file_name.find(fnsearch) == 0 && p.path().extension() == ".txt")
+			{
+				replacepath = Path(p.path());
+			}
+			//path new = GenerateSaveSlotPathcustom(gamePrefix, slot, TESTEXT, name);
+			File::Rename(replacepath, npath)
+		}
+
+	}
+
+
+
 	std::string GetSlotCustomName(std::string_view gamePrefix, int slot) {
 		std::string path = GetSysDirectory(DIRECTORY_SAVESTATE).ToVisualString();
 		std::string fnbase = GenerateSaveSlotFilename(gamePrefix, slot, STATE_EXTENSION);
@@ -766,6 +815,7 @@ int g_screenshotFailures;
 			path new = GenerateSaveSlotPathcustom(gamePrefix, slot, TESTEXT, name);
 			File::Rename(replacepath, npath)
 		}
+
 	}
 
 	std::vector<Operation> Flush() {
