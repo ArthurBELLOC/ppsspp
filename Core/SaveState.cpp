@@ -338,6 +338,7 @@ int g_screenshotFailures;
 		return StringFromFormat("%.*s_%d.%s", STR_VIEW(gamePrefix), slot, extension);
 	}
 
+
 	Path GenerateSaveSlotPath(std::string_view gamePrefix, int slot, const char *extension) {
 		std::string filename = GenerateSaveSlotFilename(gamePrefix, slot, extension);
 		return GetSysDirectory(DIRECTORY_SAVESTATE) / filename;
