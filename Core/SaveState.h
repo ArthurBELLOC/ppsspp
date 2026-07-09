@@ -76,6 +76,9 @@ namespace SaveState {
 	std::string GetSlotDateAsString(std::string_view gamePrefix, int slot);
 	Path GenerateSaveSlotPath(std::string_view gamePrefix, int slot, const char *extension);
 
+	std::string GetSlotCustomName(std::string_view gamePrefix, int slot);
+	Path GenerateSaveSlotPath(std::string_view gamePrefix, int slot, const char *extension);
+
 	std::string GetTitle(const Path &filename);
 
 	// Load the specified file into the current state (async.)
