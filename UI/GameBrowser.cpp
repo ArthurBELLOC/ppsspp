@@ -794,7 +794,7 @@ void GameBrowser::Refresh() {
 		}
 
 		if (browseFlags_ & BrowseFlags::HOMEBREW_STORE) {
-			topBar->Add(new Choice(mm->T("Homebrew store"), ImageID("I_HOMEBREW_STORE"), new UI::LinearLayoutParams(WRAP_CONTENT, 64.0f)))->OnClick.Handle(this, &GameBrowser::OnHomebrewStore);
+			topBar->Add(new Choice(mm->T("skibidi"), ImageID("I_HOMEBREW_STORE"), new UI::LinearLayoutParams(WRAP_CONTENT, 64.0f)))->OnClick.Handle(this, &GameBrowser::OnHomebrewStore);
 		}
 
 		if (browseFlags_ & BrowseFlags::UPLOAD_BUTTON) {
