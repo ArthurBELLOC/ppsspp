@@ -21,9 +21,6 @@
 #include <mutex>
 #include <string>
 #include <set>
-#include <bits/stdc++.h>
-#include <cstdlib>
-#include <iostream>
 
 #include "Common/Data/Text/I18n.h"
 #include "Common/Thread/ThreadUtil.h"
@@ -69,7 +66,6 @@ constexpr int SCREENSHOT_FAILURE_RETRIES = 6;
 static const char * const STATE_EXTENSION = "ppst";
 static const char * const UNDO_STATE_EXTENSION = "undo.ppst";
 static const char * const UNDO_SCREENSHOT_EXTENSION = "undo.jpg";
-static const char * const TESTEXT = ".txt";
 
 static const char * const LOAD_UNDO_NAME = "load_undo.ppst";
 
@@ -338,22 +334,12 @@ int g_screenshotFailures;
 	}
 
 	// The prefix is always based on GenerateFullDiscId. So we can find these by scanning, too.
-	std::string GenerateSaveSlotFilename2(std::string_view gamePrefix, int slot, const char *extension, std::string customname) {
-		return StringFromFormat("%.*s_%d_%s%s", STR_VIEW(gamePrefix), slot, customname.c_str(), extension);
-	}
-
 	std::string GenerateSaveSlotFilename(std::string_view gamePrefix, int slot, const char *extension) {
 		return StringFromFormat("%.*s_%d.%s", STR_VIEW(gamePrefix), slot, extension);
 	}
 
-
 	Path GenerateSaveSlotPath(std::string_view gamePrefix, int slot, const char *extension) {
 		std::string filename = GenerateSaveSlotFilename(gamePrefix, slot, extension);
-		return GetSysDirectory(DIRECTORY_SAVESTATE) / filename;
-	}
-
-	Path GenerateSaveSlotPathcustom(std::string_view gamePrefix, int slot, const char *extension, std::string customname) {
-		std::string filename = GenerateSaveSlotFilename2(gamePrefix, slot, extension, customname);
 		return GetSysDirectory(DIRECTORY_SAVESTATE) / filename;
 	}
 
@@ -486,7 +472,6 @@ int g_screenshotFailures;
 		}
 
 		Path fn = GenerateSaveSlotPath(gamePrefix, slot, STATE_EXTENSION);
-		Path fn2 = GenerateSaveSlotPathcustom(gamePrefix, slot, TESTEXT, "dsdsd");
 		Path fnUndo = GenerateSaveSlotPath(gamePrefix, slot, UNDO_STATE_EXTENSION);
 		if (!fn.empty()) {
 			Path shot = GenerateSaveSlotPath(gamePrefix, slot, SCREENSHOT_EXTENSION);
@@ -517,8 +502,6 @@ int g_screenshotFailures;
 			}
 			ScheduleSaveScreenshot(shot);
 			Save(fn.WithExtraExtension(".tmp"), slot, renameCallback);
-			Save(fn2, slot, callback);
-			
 		} else {
 			if (callback) {
 				auto sy = GetI18NCategory(I18NCat::SYSTEM);
@@ -722,50 +705,6 @@ int g_screenshotFailures;
 	std::string GetSlotDateAsString(std::string_view gamePrefix, int slot) {
 		std::string fn = GenerateSaveSlotFilename(gamePrefix, slot, STATE_EXTENSION);
 		return GetSaveFileDateAsString(fn);
-	}
-
-	std::string GetSlotCustomName(std::string_view gamePrefix, int slot) {
-		std::string path = GetSysDirectory(DIRECTORY_SAVESTATE).ToVisualString();
-		std::string fnbase = GenerateSaveSlotFilename(gamePrefix, slot, STATE_EXTENSION);
-		std::string delimiter1 = "_";
-		std::string delimiter2 = ".p";
-		std::string delimiter3 = ".";
-		std::string fnsearch = fnbase.substr(0, fnbase.find(delimiter2));
-		std::string res;
-		std::string token;
-        for(auto& p: std::filesystem::directory_iterator(path))
-		{
-				std::string file_name = p.path().filename();
-			if ( file_name.find(fnsearch) == 0 && p.path().extension() == ".txt")
-			{
-				res = file_name;
-			}
-		}
-		size_t underscorePos = res.find_last_of(delimiter1);
-		size_t dotPos = res.find_last_of(delimiter3);
-		if (underscorePos == std::string::npos || dotPos == std::string::npos || dotPos <= underscorePos + 1)
-        	return {};
-
-    	std::string result = res.substr(underscorePos + 1, dotPos - underscorePos - 1);
-    	return result;
-	}
-
-	void SetSlotCustomName(std::string_view gamePrefix, int slot, std::string_view new_name){
-		std::string path = GetSysDirectory(DIRECTORY_SAVESTATE).ToVisualString();
-		std::string fnbase = GenerateSaveSlotFilename(gamePrefix, slot, STATE_EXTENSION);
-		std::string fnsearch = fnbase.substr(0, fnbase.find(".p"));
-		std::string name = SanitizeString(new_name, StringRestriction::NoLineBreaksOrSpecials, 0, 64);
-		std::string replacepath;
-		for(auto& p: std::filesystem::directory_iterator(path))
-		{
-				std::string file_name = p.path().filename();
-			if ( file_name.find(fnsearch) == 0 && p.path().extension() == ".txt")
-			{
-				replacepath = Path(p.path());
-			}
-			path new = GenerateSaveSlotPathcustom(gamePrefix, slot, TESTEXT, name);
-			File::Rename(replacepath, npath)
-		}
 	}
 
 	std::vector<Operation> Flush() {
